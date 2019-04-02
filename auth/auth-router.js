@@ -25,6 +25,9 @@ router.post('/login', (req, res) => {
     .first()
     .then(user => {
       if (user && bcrypt.compareSync(password, user.password)) {
+        // req.session is added by express-session
+        req.session.user = user;
+
         res.status(200).json({
           message: `Welcome ${user.username}!`,
         });
@@ -35,6 +38,22 @@ router.post('/login', (req, res) => {
     .catch(error => {
       res.status(500).json(error);
     });
+});
+
+// NEW CODE
+router.get('/logout', (req, res) => {
+
+  if(req.session) {
+    req.session.destroy(err => {
+      if(err) {
+        res.status(500).json({ message: "You can check out any time you like, but you can never leave." });
+      } else {
+        res.status(200).json({ message: "You have logged out." });
+      }
+    });
+  } else {
+    res.status(200).json({ message: "That's it! Thanks, bye." });
+  }
 });
 
 module.exports = router;
